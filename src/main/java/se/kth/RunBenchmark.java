@@ -3,8 +3,8 @@ package se.kth;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.kth.util.JsonUtils;
 import se.kth.model.BenchmarkResult;
+import se.kth.util.JsonUtils;
 import se.kth.util.ResultsWriter;
 import se.kth.util.SemBUpdate;
 
@@ -25,9 +25,10 @@ public class RunBenchmark {
         CollectionType jsonType = JsonUtils.getTypeFactory().constructCollectionType(List.class, SemBUpdate.class);
         List<SemBUpdate> semBUpdates = JsonUtils.readFromFile(benchmarkFile, jsonType);
         List<BenchmarkResult> results = new LinkedList<>();
+        Semanticanary semanticanary = new Semanticanary();
         for (SemBUpdate semBUpdate : semBUpdates) {
             logger.info("Starting update: " + semBUpdate.getId());
-            boolean result = Main.run(String.valueOf(semBUpdate.getId()), semBUpdate.getPreVersionImageName(),
+            boolean result = semanticanary.run(String.valueOf(semBUpdate.getId()), semBUpdate.getPreVersionImageName(),
                     semBUpdate.getPostVersionImageName(), semBUpdate.getTargetMethod());
             results.add(new BenchmarkResult(String.valueOf(semBUpdate.getId()), semBUpdate.isSemB(),
                     semBUpdate.isGroundTruth(), result));

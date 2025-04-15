@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.dockerjava.api.model.HostConfig;
 import org.apache.commons.lang3.tuple.Pair;
 import picocli.CommandLine;
-import se.kth.util.FileUtils;
 import se.kth.comparison.ValueComparator;
 import se.kth.instrumentation.HostConfigBuilder;
 import se.kth.instrumentation.ProjectExtractor;
@@ -13,50 +12,51 @@ import se.kth.matching.Matcher;
 import se.kth.model.MethodInvocation;
 import se.kth.util.Config;
 import se.kth.util.DockerBuild;
+import se.kth.util.FileUtils;
 import se.kth.util.ResultsWriter;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-public class Main {
-
-    @CommandLine.Option(
-            names = {"-o", "--oldVersion"},
-            description = "Name of the docker image of the old version",
-            required = true)
-    static String oldVersionImage = "ghcr.io/chains-project/breaking-updates:jsoup-1.7.1";
+public class Semanticanary implements Callable<Integer> {
 
     @CommandLine.Option(
-            names = {"-n", "--newVersion"},
-            description = "Name of the docker image of the new version",
+            names = {"-pre", "--preVersionImage"},
+            description = "Name of the docker image of the pre-update version",
             required = true)
-    static String newVersionImage = "ghcr.io/chains-project/breaking-updates:jsoup-1.7.3";
+    String preVersionImage;
+
+    @CommandLine.Option(
+            names = {"-post", "--postVersionImage"},
+            description = "Name of the docker image of the post-update version",
+            required = true)
+    String postVersionImage;
 
     @CommandLine.Option(
             names = {"-a", "--agentPath"},
             description = "Path to the jar of the semantic agent",
             required = true)
-    static Path semanticAgentPath = Path.of("/Users/leo/repos/semantic-agent/target/semantic-agent-1.0-SNAPSHOT.jar");
+    Path semanticAgentPath;
 
     @CommandLine.Option(
-            names = {"-m", "--methodName"},
+            names = {"-m", "--targetMethod"},
             description = "Fully qualified name (\"fqn.your.TargetClass:targetMethod\") of the method to instrument",
             required = true)
-    static String methodName = "org.jsoup.nodes.Element:prepend(java.lang.String)";
+    String targetMethod;
 
     @CommandLine.Option(
-            names = {"--outputPath"},
-            description = "Path to the directory where the output should be stored",
-            required = false)
-    static Path outputPath = Config.getTmpDirPath().resolve("differences");
+            names = {"-o", "--outputPath"},
+            description = "Path to the directory where the output should be stored")
+    Path outputPath;
 
-
-    public static void main(String[] args) {
-        run("1", oldVersionImage, newVersionImage, methodName);
+    @Override
+    public Integer call() throws Exception {
+        boolean differencesFound = this.run("1", this.preVersionImage, this.postVersionImage, this.targetMethod);
+        return differencesFound ? 1 : 0;
     }
 
-
-    public static boolean run(String id, String preImageName, String postImageName, String targetMethod) {
+    public boolean run(String id, String preImageName, String postImageName, String targetMethod) {
         DockerBuild dockerBuild = new DockerBuild(false);
         Path extractedProjectsOutputDir = Config.getTmpDirPath().resolve("instrumentation-output").resolve(id);
         FileUtils.ensureDirectoryExists(extractedProjectsOutputDir.getParent());
@@ -87,5 +87,10 @@ public class Main {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    public static void main(String[] args) {
+        int exitCode = new CommandLine(new Semanticanary()).execute(args);
+        System.exit(exitCode);
     }
 }
