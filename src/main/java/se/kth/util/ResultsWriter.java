@@ -17,25 +17,20 @@ public class ResultsWriter {
     private static final Logger logger = LoggerFactory.getLogger(ResultsWriter.class);
 
     public static void saveDifferences(List<List<Difference>> differences, Path path) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        try {
-            FileUtils.ensureDirectoryExists(path.getParent());
-            mapper.writeValue(new File(path.toString()), differences);
-            logger.info("Results written to: {}", path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ResultsWriter.saveObject(differences, path);
     }
 
     public static void saveBenchmarkResult(List<BenchmarkResult> result, Path path) {
+        ResultsWriter.saveObject(result, path);
+    }
+
+    private static void saveObject(Object object, Path path) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         try {
             FileUtils.ensureDirectoryExists(path.getParent());
-            mapper.writeValue(new File(path.toString()), result);
+            mapper.writeValue(new File(path.toString()), object);
             logger.info("Results written to: {}", path);
         } catch (IOException e) {
             e.printStackTrace();
