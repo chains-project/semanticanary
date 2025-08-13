@@ -4,7 +4,7 @@
 ## Overview
 
 Semanticanary is a Java-based project designed to detect semantic changes in dependency updates.
-It was developed as part of the Master's thesis of [Leonard Husmann](https://www.github.com/leonardhusmann) "Detecting Semantic Changes in Dependency Updates" at the [KTH Royal Institute of Technology](https://www.kth.se).
+It was developed as part of the Master's thesis of [Leonard Husmann](https://www.github.com/leonardhusmann) "Detecting Semantic Changes in Dependency Updates" at the [KTH Royal Institute of Technology](https://www.kth.se) available [here](https://urn.kb.se/resolve?urn=urn:nbn:se:kth:diva-367525).
 
 ## Prerequisites
 - Java 17 or higher
