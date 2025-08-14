@@ -13,7 +13,7 @@ public class CreateDockerImage {
         String versionTag = "jsoup-1.7.3";
         String imageName = "jsoup-1.7.3";
 
-        DockerBuild dockerBuild = new DockerBuild(false);
+        DockerBuild dockerBuild = new DockerBuild();
         Optional<String> containerId = dockerBuild.createImageForRepositoryAtVersion(baseImage, new URL(githubUrl),
                 versionTag, imageName, outputPath);
         if (containerId.isPresent()) {

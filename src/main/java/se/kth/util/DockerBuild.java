@@ -30,8 +30,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class DockerBuild {
@@ -39,21 +37,8 @@ public class DockerBuild {
     static Logger log = LoggerFactory.getLogger(DockerBuild.class);
     private static DockerClient dockerClient;
     private static final int EXIT_CODE_OK = 0;
-    private static final List<String> containers = new ArrayList<>();
-    public static final String BASE_IMAGE = "ghcr.io/chains-project/breaking-updates:base-image";
 
-    private Boolean isBump = false;
-    private int max_attempts = 1;
-
-    public DockerBuild(Boolean isBump, int max_attempts) {
-        this.isBump = isBump;
-        createDockerClient();
-        this.max_attempts = max_attempts;
-
-    }
-
-    public DockerBuild(Boolean isBump) {
-        this.isBump = isBump;
+    public DockerBuild() {
         createDockerClient();
     }
 
@@ -84,8 +69,6 @@ public class DockerBuild {
      * the copy failed
      */
     public Path copyProjectFromContainer(String containerId, String project, Path dir) {
-        containers.add(containerId);
-
         try (InputStream dependencyStream = dockerClient.copyArchiveFromContainerCmd(containerId, "/" + project)
                 .exec()) {
             copyFiles(dir, dependencyStream);
@@ -132,7 +115,7 @@ public class DockerBuild {
 
     private void createDockerClient() {
         DockerClientConfig clientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder()
-//                .withDockerHost("tcp://localhost:2375")
+                .withDockerHost("unix:///var/run/docker.sock")
                 .withRegistryUrl("https://hub.docker.com")
                 .build();
         DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()

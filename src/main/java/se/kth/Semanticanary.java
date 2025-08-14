@@ -57,7 +57,7 @@ public class Semanticanary implements Callable<Integer> {
     }
 
     public boolean run(String id, String preImageName, String postImageName, String targetMethod) {
-        DockerBuild dockerBuild = new DockerBuild(false);
+        DockerBuild dockerBuild = new DockerBuild();
         Path extractedProjectsOutputDir = Config.getTmpDirPath().resolve("instrumentation-output").resolve(id);
         FileUtils.ensureDirectoryExists(extractedProjectsOutputDir.getParent());
         HostConfigBuilder configBuilder = new HostConfigBuilder(semanticAgentPath.toString());
